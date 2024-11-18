@@ -1,0 +1,1573 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="UTF-8">
+  <title>Vue Example</title>
+  <script src="./static/js/vue.js"></script>
+  <!-- 引入样式 -->
+  <link rel="stylesheet" href="./static/elementui/lib-master/theme-chalk/index.css">
+  <!-- 引入组件库 -->
+  <script src="./static/datav.map.vue.js"></script>
+  <script src="./static/elementui/lib-master/index.js"></script>
+  <script src="./static/js/axios.js"></script>
+  <style>
+    html,
+    body {
+      height: 100%;
+      margin: 0;
+      padding: 0;
+      width: 100%;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div id="app">
+
+    <div style="width: 100%;height: 100%;background-color: #030409;color: #fff;">
+      <dv-full-screen-container
+        style="background-image: url('./static/img/bg.png');background-size: 100% 100%;box-shadow: 0 0 3px blue;display: flex;flex-direction: column;">
+        <div class="main-header"
+          style="height: 80px;display: flex;justify-content: space-between;align-items: flex-end;">
+          <div class="mh-left" style="
+          font-size: 20px;
+          color: rgb(1, 134, 187);
+          width: 450px;
+          "></div>
+          <div class="mh-middle" style="font-size: 30px;">“魔毯着舰”安全评估与智能故障诊断系统</div>
+          <div class="mh-right" style="width: 450px;">
+            <!-- <dv-border-box-2
+              style="width: 150px; height: 55px; line-height: 50px; text-align:center;margin-left:200px;"> -->
+
+            <el-button @click="showDialog_modelSetting" type="info" round>模型设置</el-button>
+
+            <!-- </dv-border-box-2> -->
+          </div>
+        </div>
+
+        <dv-border-box-1 class="main-container" style="height: calc(100% - 80px);">
+          <div class="mc" style="          box-sizing: border-box;
+          padding: 30px;
+          display: flex;
+          height: 100%;">
+            <div class="mc-left" style="width: 30%;">
+
+              <dv-border-box-11 class="mc-left-top-container" title="操作区">
+
+
+                <div style="position: absolute; top: 15%; left:20% ;margin: 10px;">
+                  <div class="block">
+                    <div>
+                      <span class="demonstration">选择项目</span>
+                      <el-cascader :options="options_project" v-model="selectedOptions_project" @change="chooseProject">
+                      </el-cascader>
+                    </div>
+                    <br>
+                    <div>
+                      <span class="demonstration">诊断模型</span>
+                      <el-cascader :options="options_models" v-model="selectedOptions_model">
+                      </el-cascader>
+                    </div>
+                    <br>
+                    <div>
+                      <span class="demonstration">故障类型</span>
+                      <el-cascader :options="options_fault_style" v-model="selectedOptions_fault_style">
+                      </el-cascader>
+                    </div>
+                  </div>
+                  <div>
+                    <dv-decoration-3 style="width:350px;height:30px;" />
+                  </div>
+                  <div style="margin-top: 10px;">
+                    <div style="margin: 10px;">
+                      开始时间
+                      <el-input-number v-model="seconds_start" :min="0" :max="59" :step="1" size="large"
+                        controls-position="right" @change="handleChange_start">
+                        <template v-slot:append>秒</template>
+                      </el-input-number>
+                    </div>
+                    <div style="margin: 10px;">
+                      结束时间
+                      <el-input-number v-model="seconds_end" :min="0" :max="59" :step="1" size="large"
+                        controls-position="right" @change="handleChange_end">
+                        <template v-slot:append>秒</template>
+                      </el-input-number>
+                    </div>
+                  </div>
+                  <el-button type="success" v-on:click="step1_inject_fault">故障注入</el-button>
+                  <el-button type="warning" @click="show_teamsRT_result">TeamsRT结果</el-button>
+                  <el-button type="danger" @click="clearData">清除数据</el-button>
+
+                </div>
+              </dv-border-box-11>
+
+              <dv-border-box-11 class="mc-left-bottom-container" title="处理状态">
+                <div style="position: absolute; top: 20%; left:20%; ">
+
+                  <div>
+                    <dv-percent-pond :config="process_percent" style="width:100%;height:100px;" />
+                  </div>
+                  <div>
+                    <dv-decoration-3 style="width:350px;height:30px;" />
+                  </div>
+                  <h1> {{process_state}} </h1>
+                  <div>
+                    <dv-decoration-3 style="width:350px;height:30px;" />
+                  </div>
+
+
+                  <div>
+                  </div>
+
+                </div>
+              </dv-border-box-11>
+            </div>
+
+            <div class="mc-middle" style="width: 40%;">
+              <dv-border-box-12 style="height:40%;  justify-content:center; align-items:center">
+                <div style="position: absolute; top: 10%; left:10%; ">
+                  <img :src="currentImage" alt="My Image" style="max-width: 500px; max-height: 500px;">
+                </div>
+              </dv-border-box-12>
+
+              <dv-border-box-12 style="height:60%;">
+                <div style="position: absolute; top: 10%; left:12%; width:80%;height: 80%; ">
+                  <div class="block" style="position:relative;left:16% ;margin-bottom: 20px;">
+                    <span class="demonstration">参数</span>
+                    <el-cascader :options="options_data_style" v-model="selectedOptions_data_style"
+                      @change="handleChange">
+                    </el-cascader>
+                  </div>
+                  <img v-if="isValidSrc" :src="currentImage_data_type" alt="My Image" style="max-width:500px; max-height: 500px;">
+                </div>
+              </dv-border-box-12>
+
+            </div>
+
+
+
+
+            <div class="mc-right" style="width: 30%;">
+              <dv-border-box-11 class="mc-right-top-container" title="故障得分">
+                <div style="position: absolute; top: 15%; left:10%; width: 90%;height: 80%;">
+
+                  <dv-scroll-ranking-board :config="fault_probabilitys" style="width:90%;height:90%" />
+                </div>
+              </dv-border-box-11>
+
+              <dv-border-box-11 class="mc-right-bottom-container" title="风险评估">
+                <!-- 可以调整top;left 调整位置 -->
+                <div style="position: absolute; top: 15%; left:21%">
+
+                  <h1 style="position: relative;  left:10%"> 风险评估分数：{{risk_score}} </h1>
+                  <img :src="risklight" alt="My Image" style="max-width: 400px; max-height: 400px;">
+                  <div style="position: absolute;top: 30%; left:90%">
+
+
+                    <div style="width: 40px; height: 40px; background-color: red;"></div>
+
+                    <div style="width: 40px; height: 40px; background-color: orange;"></div>
+                    <div style="width: 40px; height: 40px; background-color: yellow;"></div>
+                    <div style="width: 40px; height: 40px; background-color: lightgreen;"></div>
+                    <div style="width: 40px; height: 40px; background-color: darkgreen;"></div>
+
+                  </div>
+                  <div style="position: absolute;top: 30%; left:110%">
+                    <img :src="arrow" alt="My Image" style="max-width: 200px; max-height: 200px;">
+                  </div>
+
+
+                </div>
+
+              </dv-border-box-11>
+
+
+
+
+            </div>
+          </div>
+        </dv-border-box-1>
+      </dv-full-screen-container>
+    </div>
+
+    <el-dialog :visible.sync="dialogVisible_modelSetting" class="modelsetting-dialog" :before-close="handleClose">
+      <el-card>
+        <div slot="header" class="clearfix">
+          <span>项目创建</span>
+        </div>
+
+        <el-form ref="projectCreate_form" :model="projectCreate_form" label-width="100px">
+          <el-form-item label="文件上传">
+            <input type="file" id="file" style="display: none" webkitdirectory />
+            <el-input placeholder="请选择文件" v-model="projectCreate_form.file_path" class="input-with-select">
+              <el-button slot="append" icon="el-icon-folder-opened" @click="openFile"></el-button>
+            </el-input>
+          </el-form-item>
+
+          <el-form-item label="采样率（Hz）">
+            <el-input-number v-model="projectCreate_form.sampling_rate" :min="0" :max="1000" :step="1" size="large"
+              controls-position="right">
+
+            </el-input-number>
+          </el-form-item>
+          <el-form-item label="截取时长（s）">
+            <el-input-number v-model="projectCreate_form.slice_duration_s" :min="0" :max="1000" :step="0.1" size="large"
+              controls-position="right">
+
+            </el-input-number>
+          </el-form-item>
+          <el-form-item label="提前时长（s）">
+            <el-input-number v-model="projectCreate_form.slice_ahead_s" :min="0" :max="1000" :step="0.1" size="large"
+              controls-position="right">
+
+            </el-input-number>
+          </el-form-item>
+          <el-form-item label="项目名称">
+            <el-input v-model="projectCreate_form.project_name" placeholder="请输入项目名称"></el-input>
+          </el-form-item>
+
+          <el-form-item>
+            <el-button type="primary" @click="createProject">立即创建</el-button>
+
+          </el-form-item>
+        </el-form>
+
+
+
+
+      </el-card>
+      <el-card>
+        <div slot="header" class="clearfix">
+          <span>模型设置</span>
+        </div>
+
+        <span class="demonstration">项目选择</span>
+
+        <el-cascader :options="options_project" v-model="selectedOptions_project" @change="chooseProject">
+        </el-cascader>
+        <el-button type="primary" @click="deleteProject">删除项目</el-button>
+
+
+        <div v-if="selectedOptions_project!==''">
+          <div style="text-align: center; margin: 20px;">
+            采样率（Hz）:{{projectChoose.sampling_rate}} 截取时长(s)：{{projectChoose.slice_duration_s}}
+            提前时长(s)：{{projectChoose.slice_ahead_s}}
+          </div>
+          <el-steps :active="project_state" finish-status="success" simple style="margin-top: 20px">
+            <el-step title="项目设置"></el-step>
+            <el-step title="特征提取"></el-step>
+            <el-step title="特征选择与模型训练"></el-step>
+            <el-step title="完成训练"></el-step>
+          </el-steps>
+          <div style="margin: 20px; text-align: center;">
+            进程数量：
+
+            <el-input-number v-model="worker_num" :min="0" :max="100" :step="1" size="large" controls-position="right">
+          </div>
+          <div style="text-align: center;">
+            <el-button type="primary" @click="extract_features">模型训练</el-button>
+
+          </div>
+
+
+        </div>
+
+      </el-card>
+      <el-card>
+        <div>
+          <input type="file" id="fileInput1" style="display: none;" @change="handleFile_cengci1">
+          <el-button style="width: 200px;" type="primary" @click="selectFile_cengci1">第一行矩阵存储文件配置</el-button>
+          <br>
+          <br>
+          <input type="file" id="fileInput2" style="display: none;" @change="handleFile_cengci2_x">
+          <el-button style="width: 200px;" type="primary" @click="selectFile_cengci2_x">X矩阵存储文件配置</el-button>
+          <br>
+          <br>
+          <input type="file" id="fileInput3" style="display: none;" @change="handleFile_cengci2_im">
+          <el-button style="width: 200px;" type="primary" @click="selectFile_cengci2_im">IM矩阵存储文件配置</el-button>
+          <br>
+          <br>
+          <input type="file" id="fileInput4" style="display: none;" @change="handleFile_cengci2_ic">
+          <el-button style="width: 200px;" type="primary" @click="selectFile_cengci2_ic">IC矩阵存储文件配置</el-button>
+          <br>
+          <br>
+          <input type="file" id="fileInput5" style="display: none;" @change="handleFile_cengci2_ar">
+          <el-button style="width: 200px;" type="primary" @click="selectFile_cengci2_ar">AR矩阵存储文件配置</el-button>
+          <br>
+          <br>
+          <input type="file" id="fileInput6" style="display: none;" @change="handleFile_cengci2_land">
+          <el-button style="width: 200px;" type="primary" @click="selectFile_cengci2_land">着舰矩阵存储文件配置</el-button>
+          <br>
+          <br>
+          <input type="file" id="fileInput7" style="display: none;" @change="handleFile_traindata">
+          <el-button style="width: 200px;" type="primary" @click="selectFile_traindata">训练集存储文件配置</el-button>
+
+        </div>
+      </el-card>
+
+      <el-dialog width="50%" title="处理中请勿关闭窗口！处理完毕会自动关闭" :visible.sync="innerVisible" :before-close="handleClose"
+        append-to-body>
+      </el-dialog>
+    </el-dialog>
+
+    <el-dialog :visible.sync="dialogVisible_teamsRT" title="TeamsRT结果" center>
+      <div>
+
+        <h2>故障部件</h2>
+        <el-tag type="danger" size="mini" v-for="item in teamsRTdiagResult.b" :key="item.ID" class="tag-with-margin">{{
+          item.Name }}</el-tag>
+
+        <h2>怀疑部件</h2>
+        <el-tag type="warning" size="mini" v-for="item in teamsRTdiagResult.s" :key="item.ID" class="tag-with-margin">{{
+          item.Name }}</el-tag>
+
+        <h2>无故障部件</h2>
+        <el-tag type="success" size="mini" v-for="item in teamsRTdiagResult.g" :key="item.ID" class="tag-with-margin">{{
+          item.Name }}</el-tag>
+
+        <h2>未知部件</h2>
+        <el-tag type="info" size="mini" v-for="item in teamsRTdiagResult.u" :key="item.ID" dclass="tag-with-margin">{{
+          item.Name }}</el-tag>
+      </div>
+    </el-dialog>
+
+
+
+
+
+
+  </div>
+  </div>
+
+
+  <script>
+
+
+
+    const options_fault_style = [
+      {
+        value: 0,
+        label: "无故障"
+      },
+      {
+        value: 1,
+        label: "自动油门自动断开"
+      },
+      {
+        value: 2,
+        label: "自动油门杆偏差"
+      },
+      {
+        value: 3,
+        label: "自动油门链路失效"
+      },
+      {
+        value: 4,
+        label: "发动机空中停车"
+      },
+      {
+        value: 5,
+        label: "发动机推力下降"
+      },
+      {
+        value: 6,
+        label: "发动机漏油"
+      },
+      {
+        value: 7,
+        label: "方向舵卡死"
+      },
+      {
+        value: 8,
+        label: "方向舵硬件失效（上饱和）"
+      },
+      {
+        value: 9,
+        label: "方向舵硬件失效（下饱和）"
+      },
+      {
+        value: 10,
+        label: "方向舵漂浮"
+      },
+      {
+        value: 11,
+        label: "方向舵控制效能损失"
+      },
+      {
+        value: 12,
+        label: "副翼卡死"
+      },
+      {
+        value: 13,
+        label: "副翼硬件失效（上饱和）"
+      },
+      {
+        value: 14,
+        label: "副翼硬件失效（下饱和）"
+      },
+      {
+        value: 15,
+        label: "副翼漂浮"
+      },
+      {
+        value: 16,
+        label: "副翼控制效能损失"
+      },
+      {
+        value: 17,
+        label: "升降舵卡死"
+      },
+      {
+        value: 18,
+        label: "升降舵硬件失效（上饱和）"
+      },
+      {
+        value: 19,
+        label: "升降舵硬件失效（下饱和）"
+      },
+      {
+        value: 20,
+        label: "升降舵漂浮"
+      },
+      {
+        value: 21,
+        label: "升降舵控制效能损失"
+      },
+      {
+        value: 22,
+        label: "前缘襟翼卡死"
+      },
+      {
+        value: 23,
+        label: "前缘襟翼硬件失效（上饱和）"
+      },
+      {
+        value: 24,
+        label: "前缘襟翼硬件失效（下饱和）"
+      },
+      {
+        value: 25,
+        label: "前缘襟翼漂浮"
+      },
+      {
+        value: 26,
+        label: "前缘襟翼控制效能损失"
+      },
+      {
+        value: 27,
+        label: "后缘襟翼卡死"
+      },
+      {
+        value: 28,
+        label: "后缘襟翼硬件失效（上饱和）"
+      },
+      {
+        value: 29,
+        label: "后缘襟翼硬件失效（下饱和）"
+      },
+      {
+        value: 30,
+        label: "后缘襟翼漂浮"
+      },
+      {
+        value: 31,
+        label: "后缘襟翼控制效能损失"
+      },
+      {
+        value: 32,
+        label: "L控制器无信号"
+      },
+      {
+        value: 33,
+        label: "M控制器无信号"
+      },
+      {
+        value: 34,
+        label: "N控制器无信号"
+      },
+      {
+        value: 35,
+        label: "T控制器无信号"
+      },
+      {
+        value: 36,
+        label: "Y控制器无信号"
+      },
+      {
+        value: 37,
+        label: "L控制器恒偏差"
+      },
+      {
+        value: 38,
+        label: "M控制器恒偏差"
+      },
+      {
+        value: 39,
+        label: "N控制器恒偏差"
+      },
+      {
+        value: 40,
+        label: "T控制器恒偏差"
+      },
+      {
+        value: 41,
+        label: "Y控制器恒偏差"
+      },
+      {
+        value: 42,
+        label: "L控制器随机输出"
+      },
+      {
+        value: 43,
+        label: "M控制器随机输出"
+      },
+      {
+        value: 44,
+        label: "N控制器随机输出"
+      },
+      {
+        value: 45,
+        label: "T控制器随机输出"
+      },
+      {
+        value: 46,
+        label: "Y控制器随机输出"
+      },
+      {
+        value: 47,
+        label: "L控制器死机"
+      },
+      {
+        value: 48,
+        label: "M控制器死机"
+      },
+      {
+        value: 49,
+        label: "N控制器死机"
+      },
+      {
+        value: 50,
+        label: "T控制器死机"
+      },
+      {
+        value: 51,
+        label: "Y控制器死机"
+      },
+      {
+        value: 52,
+        label: "座舱驾驶杆操纵空程（升降舵）"
+      },
+      {
+        value: 53,
+        label: "座舱驾驶杆操纵空程（副翼）"
+      },
+      {
+        value: 54,
+        label: "座舱脚蹬偏斜"
+      },
+      {
+        value: 55,
+        label: "座舱脚蹬振动"
+      },
+      {
+        value: 56,
+        label: "开关按钮失效（前缘襟翼）"
+      },
+      {
+        value: 57,
+        label: "开关按钮失效（后缘襟翼）"
+      },
+      {
+        value: 58,
+        label: "座舱脚蹬卡滞"
+      },
+    ]
+
+    const options_data_style = [
+      {
+        value: 0,
+        label: "Vk(速率)"
+      },
+      {
+        value: 1,
+        label: "delta_a(副翼偏角)"
+      },
+      {
+        value: 2,
+        label: "delta_e(升降舵偏角)"
+      },
+      {
+        value: 3,
+        label: "delta_r(方向舵偏角)"
+      },
+      {
+        value: 4,
+        label: "delta_lef(前缘襟翼偏角)"
+      },
+      {
+        value: 5,
+        label: "delta_tef(后缘襟翼偏角)"
+      },
+      {
+        value: 6,
+        label: "delta_a1(副翼偏角指令)"
+      },
+      {
+        value: 7,
+        label: "delta_e1(升降舵偏角指令)"
+      },
+      {
+        value: 8,
+        label: "delta_r1(方向舵偏角指令)"
+      },
+      {
+        value: 9,
+        label: "delta_lef1(前缘襟翼偏角指令)"
+      },
+      {
+        value: 10,
+        label: "delta_tef1(后缘襟翼偏角指令)"
+      },
+      {
+        value: 11,
+        label: "theta(俯仰角)"
+      },
+      {
+        value: 12,
+        label: "phi(滚转角)"
+      },
+      {
+        value: 13,
+        label: "psi(偏航角)"
+      },
+      {
+        value: 14,
+        label: "x(地面坐标系-x)"
+      },
+      {
+        value: 15,
+        label: "y(地面坐标系-y)"
+      },
+      {
+        value: 16,
+        label: "z(地面坐标系-z)"
+      },
+      {
+        value: 17,
+        label: "p(绕机体x轴角速度)"
+      },
+      {
+        value: 18,
+        label: "q(绕机体y轴角速度)"
+      },
+      {
+        value: 19,
+        label: "r(绕机体z轴角速度)"
+      },
+      {
+        value: 20,
+        label: "gamma(下滑角)"
+      },
+      {
+        value: 21,
+        label: "chi(方位角)"
+      },
+      {
+        value: 22,
+        label: "mu(速度滚转角)"
+      },
+      {
+        value: 23,
+        label: "beta(侧滑角)"
+      },
+      {
+        value: 24,
+        label: "alpha(攻角)"
+      },
+      {
+        value: 25,
+        label: "delta_p(油门开度)"
+      },
+    ]
+
+    var app = new Vue({
+
+      el: '#app',
+      data: {
+        isValidSrc:false,
+        dialogVisible_teamsRT: false,
+        innerVisible: false,
+        currentImage_data_type: null,
+        process_state: '请注入故障',
+        selectedOptions_fault_style: [0],
+        selectedOptions_data_style: 0,
+        seconds_start: 5,
+        seconds_end: 25,
+        risk_score: 0,
+        options_fault_style,
+        options_data_style,
+        result_table: [],
+        result_fault: 0,
+        name: '',
+        greeting: '',
+        process_percent: {
+          value: 0,
+          lineDash: [20, 5]
+        },
+        ///////// 具体故障类型故障概率显示 start//////////////
+        fault_probabilitys: {
+          data: [],
+          rowNum: 10
+        },
+        /////////////// 具体故障类型故障概率显示 end/////////////////////
+
+        dialogVisible_modelSetting: false,
+
+        activeName: '1',
+
+        projectCreate_form: {
+          file_path: '',
+          sampling_rate: 400,
+          slice_duration_s: 10,
+          slice_ahead_s: 2.5,
+          project_name: ''
+        },
+
+        options_project: [],
+        selectedOptions_project: '',
+
+        projectChoose: {
+          sampling_rate: '',
+          slice_duration_s: '',
+          slice_ahead_s: '',
+        },
+
+        worker_num: 1,
+        project_state: 1,
+        selectedOptions_model: '',
+        options_models: [],
+
+        teamsRTdiagResult: {
+          "g": [
+            // 这里是你的JSON数据中的"g"部分
+          ],
+          "b": [
+            // 这里是你的JSON数据中的"b"部分
+          ],
+          "s": [
+            // 这里是你的JSON数据中的"s"部分
+          ],
+          "u": [
+            // 这里是你的JSON数据中的"u"部分
+          ]
+        }
+      },
+      mounted() {
+        // 更新项目列表
+        this.updata_project_list()
+
+        // this.handleChange(1)
+        ////////////// 具体故障类型故障概率显示 start/////////////////////
+        // this.options_fault_style.forEach(element => {
+        //   this.fault_probabilitys.data.push({
+        //     name: element.label,
+        //     value: 0
+        //   })
+        // });
+
+        ///////////// 具体故障类型故障概率显示 end/////////////////////
+      },
+      computed: {
+
+        currentImage() {
+          console.log('ate', this.result_fault)
+          if (this.result_fault == 1 || this.result_fault == 2 || this.result_fault == 3) {
+            return '.\\static\\fault_location_pictures\\autothrottle.png'
+          } else if (this.result_fault == 4 || this.result_fault == 5 || this.result_fault == 6) {
+            return '.\\static\\fault_location_pictures\\engines.png'
+          } else if (this.result_fault == 7 || this.result_fault == 8 || this.result_fault == 9 || this.result_fault == 10 || this.result_fault == 11) {
+            return '.\\static\\fault_location_pictures\\rudder.png'
+          } else if (this.result_fault == 12 || this.result_fault == 13 || this.result_fault == 14 || this.result_fault == 15 || this.result_fault == 16) {
+            return '.\\static\\fault_location_pictures\\aileron.png'
+          } else if (this.result_fault == 17 || this.result_fault == 18 || this.result_fault == 19 || this.result_fault == 20 || this.result_fault == 21) {
+            return '.\\static\\fault_location_pictures\\elevator.png'
+          } else if (this.result_fault == 22 || this.result_fault == 23 || this.result_fault == 24 || this.result_fault == 25 || this.result_fault == 26) {
+            return '.\\static\\fault_location_pictures\\leading_edge_flap.png'
+          } else if (this.result_fault == 27 || this.result_fault == 28 || this.result_fault == 29 || this.result_fault == 30 || this.result_fault == 31) {
+            return '.\\static\\fault_location_pictures\\trailing_edge_flap.png'
+          } else if (this.result_fault >= 32 && this.result_fault <= 52) {
+            return '.\\static\\fault_location_pictures\\control_system.png'
+          } else if (this.result_fault == 53 || this.result_fault == 54 || this.result_fault == 55 || this.result_fault == 56 || this.result_fault == 57 || this.result_fault == 58) {
+            return '.\\static\\fault_location_pictures\\cockpit.png'
+          } else {
+            return '.\\static\\fault_location_pictures\\normal.png'
+          }
+
+        },
+        risklight() {
+          console.log('ate', this.risk_score)
+          if (this.risk_score >= 0 && this.risk_score < 0.2) {
+            return '.\\static\\risklight\\darkgreen_circle.png'
+          } else if (this.risk_score >= 0.2 && this.risk_score < 0.4) {
+            return '.\\static\\risklight\\lightgreen_circle.png'
+          } else if (this.risk_score >= 0.4 && this.risk_score < 0.6) {
+            return '.\\static\\risklight\\yellow_circle.png'
+          } else if (this.risk_score >= 0.6 && this.risk_score < 0.8) {
+            return '.\\static\\risklight\\orange_circle.png'
+          } else if (this.risk_score >= 0.8 && this.risk_score <= 1) {
+            return '.\\static\\risklight\\red_circle.png'
+          }
+        },
+        arrow() {
+          return '.\\static\\risklight\\arrow.png'
+        },
+      },
+
+      methods: {
+        handleClose(done) {
+          this.$confirm('项目已经完成配置或正在处理，确认关闭？')
+            .then(_ => {
+              done();
+            })
+            .catch(_ => { });
+        },
+        //////////////////// 模型推理四大步 start /////////////////////
+        step1_inject_fault() {
+          console.log(this.selectedOptions_fault_style, 'ate')
+
+          if (this.selectedOptions_project == '' || this.selectedOptions_model == '') {
+            this.$message({
+              message: '请选择项目和诊断模型',
+              type: 'warning'
+            });
+            return
+          }
+
+          if (this.seconds_start < 3) {
+            this.$message({
+              message: '开始时间不能小于3秒',
+              type: 'warning'
+            });
+            return
+          }
+
+          if (this.seconds_end - this.seconds_start < 3) {
+            this.$message({
+              message: '故障持续时间不能小于5秒',
+              type: 'warning'
+            });
+            return
+          }
+          this.$message("开始注入故障与检测故障");
+          axios.get('/api/inject_fault', { params: { fault_style: this.selectedOptions_fault_style[0], seconds_start: this.seconds_start, seconds_end: this.seconds_end } })
+            .then(response => {
+              this.process_state = response.data.process_state;
+              this.step2_detect_fault()
+            })
+            .catch(error => {
+              console.error(error);
+            });
+          this.process_percent = {
+            value: 25,
+            lineDash: [20, 5]
+          }
+        },
+        step2_detect_fault() {
+          axios.get('/api/detect_fault', { params: { select_project: this.selectedOptions_project[0] } })
+            .then(response => {
+              this.process_state = response.data.process_state;
+              this.step3_process_data()
+            })
+            .catch(error => {
+              console.error(error);
+            });
+          this.process_percent = {
+            value: 50,
+            lineDash: [20, 5]
+          }
+
+        },
+        step3_process_data() {
+          axios.get('/api/process_data', { params: { select_project: this.selectedOptions_project[0], classifier_file: this.selectedOptions_model[0] } })
+            .then(response => {
+              this.process_state = response.data.process_state;
+              let teamsRTdiagResult = {
+                "g": [
+                  // 这里是你的JSON数据中的"g"部分
+                ],
+                "b": [
+                  // 这里是你的JSON数据中的"b"部分
+                ],
+                "s": [
+                  // 这里是你的JSON数据中的"s"部分
+                ],
+                "u": [
+                  // 这里是你的JSON数据中的"u"部分
+                ]
+              }
+              teamsRTdiagResult.g = JSON.parse(response.data.teamsRTdiagResult)['g'];
+              teamsRTdiagResult.b = JSON.parse(response.data.teamsRTdiagResult)['b'];
+              teamsRTdiagResult.u = JSON.parse(response.data.teamsRTdiagResult)['u'];
+              teamsRTdiagResult.s = JSON.parse(response.data.teamsRTdiagResult)['s'];
+              this.teamsRTdiagResult = teamsRTdiagResult
+              console.log("ate", teamsRTdiagResult)
+
+
+              // this.teamsRTdiagResult = response.data.teamsRTdiagResult;
+              this.step4_get_result()
+            })
+            .catch(error => {
+              console.error(error);
+            });
+          this.process_percent = {
+            value: 75,
+            lineDash: [20, 5]
+          }
+
+        },
+        step4_get_result() {
+          axios.get('/api/get_result')
+            .then(response => {
+              this.process_state = response.data.process_state;
+              this.result_table = JSON.parse(response.data.result_table);
+              this.result_fault = response.data.result_fault;
+              this.fault_probabilitys = JSON.parse(response.data.fault_probabilitys)
+              this.handleChange(1)
+              this.selectedOptions_data_style = 1
+              console.log(this.result_fault)
+              console.log(this.result_table)
+
+
+              // this.fault_probabilitys = this.fault_probabilitys
+
+              console.log(this.fault_probabilitys)
+              this.step5_risk_result()
+
+            })
+            .catch(error => {
+              console.error(error);
+            });
+          this.process_percent = {
+            value: 100,
+            lineDash: [20, 5]
+          }
+
+        },
+        step5_risk_result() {
+          axios.get('/api/risk_evaluate')
+            .then(response => {
+
+              this.risk_score = JSON.parse(response.data.risk_score);
+              this.quanzhong_final = JSON.parse(response.data.quanzhong_final);
+
+              console.log(this.risk_score)
+              console.log(this.quanzhong_final)
+            })
+            .catch(error => {
+              console.error(error);
+              this.$message({
+                message: '完成诊断',
+                type: 'success'
+              });
+            });
+          this.process_percent = {
+            value: 100,
+            lineDash: [20, 5]
+          }
+        },
+        selectFile_cengci1() {
+          const fileInput = document.getElementById('fileInput1');
+          fileInput.click();
+        },
+        handleFile_cengci1(event) {
+          const file = event.target.files[0];
+          const reader = new FileReader();
+          reader.onload = (e) => {
+            const fileData = e.target.result;
+            const fileName = file.name;
+            const formData = new FormData();
+            formData.append('file', file, fileName);
+            axios.post('/api/copy_file_cengci1', formData, {
+              headers: {
+                'Content-Type': file.type
+              }
+            })
+              .then(response => {
+                console.log('文件复制成功');
+                this.$message({
+                  message: '文件复制成功',
+                  type: 'success'
+                });
+              })
+              .catch(error => {
+                console.error('文件复制失败', error);
+                this.$message({
+                  message: '文件复制失败',
+                  type: 'warning'
+                });
+              });
+
+          };
+          reader.readAsDataURL(file);
+        },
+        selectFile_cengci2_x() {
+          const fileInput = document.getElementById('fileInput2');
+          fileInput.click();
+        },
+        handleFile_cengci2_x(event) {
+          const file = event.target.files[0];
+          const reader = new FileReader();
+          reader.onload = (e) => {
+            const fileData = e.target.result;
+            const fileName = file.name;
+            const formData = new FormData();
+            formData.append('file', file, fileName);
+            axios.post('/api/copy_file_cengci2_x', formData, {
+              headers: {
+                'Content-Type': file.type
+              }
+            })
+              .then(response => {
+                console.log('文件复制成功');
+                this.$message({
+                  message: '文件复制成功',
+                  type: 'success'
+                });
+              })
+              .catch(error => {
+                console.error('文件复制失败', error);
+                this.$message({
+                  message: '文件复制失败',
+                  type: 'warning'
+                });
+              });
+
+          };
+          reader.readAsDataURL(file);
+        },
+        selectFile_cengci2_im() {
+          const fileInput = document.getElementById('fileInput3');
+          fileInput.click();
+        },
+        handleFile_cengci2_im(event) {
+          const file = event.target.files[0];
+          const reader = new FileReader();
+          reader.onload = (e) => {
+            const fileData = e.target.result;
+            const fileName = file.name;
+            const formData = new FormData();
+            formData.append('file', file, fileName);
+            axios.post('/api/copy_file_cengci2_im', formData, {
+              headers: {
+                'Content-Type': file.type
+              }
+            })
+              .then(response => {
+                console.log('文件复制成功');
+                this.$message({
+                  message: '文件复制成功',
+                  type: 'success'
+                });
+              })
+              .catch(error => {
+                console.error('文件复制失败', error);
+                this.$message({
+                  message: '文件复制失败',
+                  type: 'warning'
+                });
+              });
+
+          };
+          reader.readAsDataURL(file);
+        },
+        selectFile_cengci2_ic() {
+          const fileInput = document.getElementById('fileInput4');
+          fileInput.click();
+        },
+        handleFile_cengci2_ic(event) {
+          const file = event.target.files[0];
+          const reader = new FileReader();
+          reader.onload = (e) => {
+            const fileData = e.target.result;
+            const fileName = file.name;
+            const formData = new FormData();
+            formData.append('file', file, fileName);
+            axios.post('/api/copy_file_cengci2_ic', formData, {
+              headers: {
+                'Content-Type': file.type
+              }
+            })
+              .then(response => {
+                console.log('文件复制成功');
+                this.$message({
+                  message: '文件复制成功',
+                  type: 'success'
+                });
+              })
+              .catch(error => {
+                console.error('文件复制失败', error);
+                this.$message({
+                  message: '文件复制失败',
+                  type: 'warning'
+                });
+              });
+
+          };
+          reader.readAsDataURL(file);
+        },
+        selectFile_cengci2_ar() {
+          const fileInput = document.getElementById('fileInput5');
+          fileInput.click();
+        },
+        handleFile_cengci2_ar(event) {
+          const file = event.target.files[0];
+          const reader = new FileReader();
+          reader.onload = (e) => {
+            const fileData = e.target.result;
+            const fileName = file.name;
+            const formData = new FormData();
+            formData.append('file', file, fileName);
+            axios.post('/api/copy_file_cengci2_ar', formData, {
+              headers: {
+                'Content-Type': file.type
+              }
+            })
+              .then(response => {
+                console.log('文件复制成功');
+                this.$message({
+                  message: '文件复制成功',
+                  type: 'success'
+                });
+              })
+              .catch(error => {
+                console.error('文件复制失败', error);
+                this.$message({
+                  message: '文件复制失败',
+                  type: 'warning'
+                });
+              });
+
+          };
+          reader.readAsDataURL(file);
+        },
+        selectFile_cengci2_land() {
+          const fileInput = document.getElementById('fileInput6');
+          fileInput.click();
+        },
+        handleFile_cengci2_land(event) {
+          const file = event.target.files[0];
+          const reader = new FileReader();
+          reader.onload = (e) => {
+            const fileData = e.target.result;
+            const fileName = file.name;
+            const formData = new FormData();
+            formData.append('file', file, fileName);
+            axios.post('/api/copy_file_cengci2_land', formData, {
+              headers: {
+                'Content-Type': file.type
+              }
+            })
+              .then(response => {
+                console.log('文件复制成功');
+                this.$message({
+                  message: '文件复制成功',
+                  type: 'success'
+                });
+              })
+              .catch(error => {
+                console.error('文件复制失败', error);
+                this.$message({
+                  message: '文件复制失败',
+                  type: 'warning'
+                });
+              });
+
+          };
+          reader.readAsDataURL(file);
+        },
+        selectFile_traindata() {
+          const fileInput = document.getElementById('fileInput7');
+          fileInput.click();
+        },
+        handleFile_traindata(event) {
+          const file = event.target.files[0];
+          const reader = new FileReader();
+          reader.onload = (e) => {
+            const fileData = e.target.result;
+            const fileName = file.name;
+            const formData = new FormData();
+            formData.append('file', file, fileName);
+            axios.post('/api/copy_file_traindata', formData, {
+              headers: {
+                'Content-Type': file.type
+              }
+            })
+              .then(response => {
+                console.log('文件复制成功');
+                this.$message({
+                  message: '文件复制成功',
+                  type: 'success'
+                });
+              })
+              .catch(error => {
+                console.error('文件复制失败', error);
+                this.$message({
+                  message: '文件复制失败',
+                  type: 'warning'
+                });
+              });
+
+          };
+          reader.readAsDataURL(file);
+        },
+        /////////////////// 模型推理四大步 end ///////////////////////////
+
+        handleChange(a) {
+          console.log(a);
+          // 将a转为为字符
+
+          axios.get('/image', { responseType: 'blob', params: { value: a.toString(), hhh: 'sdfs' } })
+            .then(response => {
+              // 将图片数据转换为 URL
+              this.currentImage_data_type = URL.createObjectURL(response.data);
+              this.isValidSrc = true
+            })
+            .catch(error => {
+              console.log(error);
+            });
+        },
+        handleChange_start() {
+          // handle seconds change event
+          if (this.seconds_start > this.seconds_end) {
+            this.seconds_end = this.seconds_start;
+          }
+        },
+        handleChange_end() {
+          // handle seconds change event
+          if (this.seconds_start > this.seconds_end) {
+            this.seconds_start = this.seconds_end;
+          }
+        },
+        tableRowClassName({ row, rowIndex }) {
+          if (row.probablity > 1) {
+            return 'warning-row';
+          } else if (rowIndex === 3) {
+            return 'success-row';
+          }
+          return '';
+        },
+        clearData() {
+          this.isValidSrc = false
+          this.result_table = [];
+          this.result_fault = 0;
+          this.selectedOptions_data_style = 0;
+          this.selectedOptions_fault_style = 0;
+          this.seconds_start = 5;
+          this.seconds_end = 25;
+          this.currentImage_data_type = "";
+          this.process_state = '请注入故障';
+          this.selectedOptions_project = '';
+          this.selectedOptions_model = '';
+          this.risk_score = 0;
+          this.fault_probabilitys = {
+            data: [],
+            rowNum: 30
+          },
+
+            this.process_percent = {
+              value: 0,
+              lineDash: [20, 5]
+            }
+          this.teamsRTdiagResult.g = []
+          this.teamsRTdiagResult.b = []
+          this.teamsRTdiagResult.u = []
+          this.teamsRTdiagResult.s = []
+          console.log(this.process_percent)
+        },
+
+
+        ////////// 模型设置相关函数 start ////////////////////
+        show_teamsRT_result() {
+          this.dialogVisible_teamsRT = true;
+
+        },
+        showDialog_modelSetting() {
+          this.dialogVisible_modelSetting = true;
+        },
+        closeDialog_modelSetting() {
+          this.dialogVisible_modelSetting = false;
+        },
+        ////////// 模型设置相关函数 end ////////////////////
+        openFile() {
+          document.getElementById("file").click();
+        },
+        updata_project_list() {
+
+          axios.get('/api/updata_project_list')
+            .then(response => {
+              this.options_project = JSON.parse(response.data.options_project)
+              console.log(this.options_project)
+              // this.step2_detect_fault()
+
+            })
+            .catch(error => {
+              console.error(error);
+            });
+        },
+        createProject() {
+          this.innerVisible = true
+          axios.get('/api/create_project', {
+            params: {
+              projectCreate_form: this.projectCreate_form
+            }
+          })
+            .then(response => {
+              this.innerVisible = false
+              console.log(response.data.process_state)
+              this.updata_project_list()
+              this.$message({
+                message: '项目创建完成',
+                type: 'success'
+              });
+            })
+            .catch(error => {
+              console.error(error);
+            });
+
+        },
+
+        deleteProject() {
+          axios.get('/api/delete_project', {
+
+            params: {
+              selectedOptions_project: String(this.selectedOptions_project)
+            }
+          })
+            .then(response => {
+
+              console.log(response.data.process_state)
+              this.updata_project_list()
+              this.$message({
+                message: '删除项目成功',
+                type: 'success'
+              });
+            })
+            .catch(error => {
+              console.error(error);
+            });
+
+
+        },
+        chooseProject() {
+          axios.get('/api/choose_project', {
+            params: {
+              selectedOptions_project: String(this.selectedOptions_project)
+            }
+          })
+            .then(response => {
+              this.projectChoose = JSON.parse(response.data.projectChoose)
+              this.options_models = JSON.parse(response.data.options_models)
+              console.log(this.projectChoose)
+              this.$message({
+                message: '项目选择成功',
+                type: 'success'
+              });
+            })
+          this.project_state = 1
+        },
+
+        extract_features() {
+          this.innerVisible = true
+
+          axios.get('/api/extract_features', {
+            params: {
+              worker_num: parseInt(this.worker_num),
+              selectedOptions_project: String(this.selectedOptions_project)
+            }
+          })
+            .then(response => {
+              this.project_state = 2
+              this.select_features()
+            })
+
+
+        },
+
+        select_features() {
+
+          axios.get('/api/select_features', {
+            params: {
+              selectedOptions_project: String(this.selectedOptions_project)
+            }
+          })
+            .then(response => {
+              this.project_state = 3
+              this.model_train()
+            })
+        },
+
+        model_train() {
+
+          axios.get('/api/model_train', {
+            params: {
+              selectedOptions_project: String(this.selectedOptions_project)
+            }
+          })
+            .then(response => {
+              this.project_state = 4
+              this.innerVisible = false
+              this.$message({
+                message: '模型训练已完成',
+                type: 'success'
+              });
+            })
+        }
+
+      }
+    }
+
+    )
+
+  </script>
+
+  <style>
+    .el-table .warning-row {
+      background: oldlace;
+    }
+
+    .el-table .success-row {
+      background: #f0f9eb;
+    }
+
+
+
+
+
+    .my-component {
+      display: flex;
+    }
+
+    .my-component-left,
+    .my-component-right {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .my-component-left-top {
+
+      height: 30vh;
+    }
+
+    .my-component-left-middle {
+      height: 10vh;
+    }
+
+    .my-component-left-bottom {
+      height: 60vh;
+    }
+
+    .my-component-right-top {
+      height: 30vh;
+    }
+
+    .my-component-right-middle {
+      height: 10vh;
+    }
+
+    .my-component-right-bottom {
+      height: 60vh;
+    }
+  </style>
+
+
+
+
+  <style>
+    .bottom-table {
+      width: calc(100% - 10px);
+      height: 100%;
+      margin: 0 -5px;
+
+      .border-box-content {
+        padding: 20px;
+        box-sizing: border-box;
+      }
+
+      .table-name {
+        height: 45px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin-bottom: 15px;
+
+        img {
+          width: 40px;
+          height: 40px;
+          margin-right: 5px;
+        }
+      }
+
+      .dv-scroll-board {
+        height: calc(100% - 60px);
+      }
+    }
+  </style>
+
+  <style>
+    .mc-left {
+      display: flex;
+      /* justify-content: center; */
+      align-items: center;
+      flex-direction: column;
+
+      .mc-left-top-container {
+        height: 50%;
+      }
+
+      .mc-left-bottom-container {
+        height: 50%;
+      }
+
+    }
+  </style>
+
+  <style>
+    .tag-with-margin {
+      margin-right: 10px;
+      /* 添加适当的右边距，根据你想要的间距大小进行调整 */
+    }
+
+    .mc-middle {
+      position: relative;
+      padding: 0 50px;
+      box-sizing: border-box;
+
+    }
+
+    .mc-right {
+      display: flex;
+      /* justify-content: center; */
+      align-items: center;
+      flex-direction: column;
+
+      .mc-right-top-container {
+        height: 50%;
+      }
+
+      .mc-right-bottom-container {
+        height: 50%;
+      }
+
+    }
+  </style>
+
+  <!-- 模型设置对话窗 -->
+  <style>
+
+  </style>
+</body>
+
+</html>
