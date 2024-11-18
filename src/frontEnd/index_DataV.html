@@ -73,154 +73,9 @@
       </el-form>
       
       <img :src="currentImage" alt="My Image" style="max-width: 500px; max-height: 500px;">
-
+      <el-button style="margin-top: 12px;" @click="forward">上一步</el-button>
       <el-button style="margin-top: 12px;" @click="next">下一步</el-button>
     </div>
-
-    <!-- <el-dialog :visible.sync="dialogVisible_modelSetting" class="modelsetting-dialog" :before-close="handleClose">
-      <el-card>
-        <div slot="header" class="clearfix">
-          <span>项目创建</span>
-        </div>
-
-        <el-form ref="projectCreate_form" :model="projectCreate_form" label-width="100px">
-          <el-form-item label="文件上传">
-            <input type="file" id="file" style="display: none" webkitdirectory />
-            <el-input placeholder="请选择文件" v-model="projectCreate_form.file_path" class="input-with-select">
-              <el-button slot="append" icon="el-icon-folder-opened" @click="openFile"></el-button>
-            </el-input>
-          </el-form-item>
-
-          <el-form-item label="采样率（Hz）">
-            <el-input-number v-model="projectCreate_form.sampling_rate" :min="0" :max="1000" :step="1" size="large"
-              controls-position="right">
-
-            </el-input-number>
-          </el-form-item>
-          <el-form-item label="截取时长（s）">
-            <el-input-number v-model="projectCreate_form.slice_duration_s" :min="0" :max="1000" :step="0.1" size="large"
-              controls-position="right">
-
-            </el-input-number>
-          </el-form-item>
-          <el-form-item label="提前时长（s）">
-            <el-input-number v-model="projectCreate_form.slice_ahead_s" :min="0" :max="1000" :step="0.1" size="large"
-              controls-position="right">
-
-            </el-input-number>
-          </el-form-item>
-          <el-form-item label="项目名称">
-            <el-input v-model="projectCreate_form.project_name" placeholder="请输入项目名称"></el-input>
-          </el-form-item>
-
-          <el-form-item>
-            <el-button type="primary" @click="createProject">立即创建</el-button>
-
-          </el-form-item>
-        </el-form>
-
-
-
-
-      </el-card>
-      <el-card>
-        <div slot="header" class="clearfix">
-          <span>模型设置</span>
-        </div>
-
-        <span class="demonstration">项目选择</span>
-
-        <el-cascader :options="options_project" v-model="selectedOptions_project" @change="chooseProject">
-        </el-cascader>
-        <el-button type="primary" @click="deleteProject">删除项目</el-button>
-
-
-        <div v-if="selectedOptions_project!==''">
-          <div style="text-align: center; margin: 20px;">
-            采样率（Hz）:{{projectChoose.sampling_rate}} 截取时长(s)：{{projectChoose.slice_duration_s}}
-            提前时长(s)：{{projectChoose.slice_ahead_s}}
-          </div>
-          <el-steps :active="project_state" finish-status="success" simple style="margin-top: 20px">
-            <el-step title="项目设置"></el-step>
-            <el-step title="特征提取"></el-step>
-            <el-step title="特征选择与模型训练"></el-step>
-            <el-step title="完成训练"></el-step>
-          </el-steps>
-          <div style="margin: 20px; text-align: center;">
-            进程数量：
-
-            <el-input-number v-model="worker_num" :min="0" :max="100" :step="1" size="large" controls-position="right">
-          </div>
-          <div style="text-align: center;">
-            <el-button type="primary" @click="extract_features">模型训练</el-button>
-
-          </div>
-
-
-        </div>
-
-      </el-card>
-      <el-card>
-        <div>
-          <input type="file" id="fileInput1" style="display: none;" @change="handleFile_cengci1">
-          <el-button style="width: 200px;" type="primary" @click="selectFile_cengci1">第一行矩阵存储文件配置</el-button>
-          <br>
-          <br>
-          <input type="file" id="fileInput2" style="display: none;" @change="handleFile_cengci2_x">
-          <el-button style="width: 200px;" type="primary" @click="selectFile_cengci2_x">X矩阵存储文件配置</el-button>
-          <br>
-          <br>
-          <input type="file" id="fileInput3" style="display: none;" @change="handleFile_cengci2_im">
-          <el-button style="width: 200px;" type="primary" @click="selectFile_cengci2_im">IM矩阵存储文件配置</el-button>
-          <br>
-          <br>
-          <input type="file" id="fileInput4" style="display: none;" @change="handleFile_cengci2_ic">
-          <el-button style="width: 200px;" type="primary" @click="selectFile_cengci2_ic">IC矩阵存储文件配置</el-button>
-          <br>
-          <br>
-          <input type="file" id="fileInput5" style="display: none;" @change="handleFile_cengci2_ar">
-          <el-button style="width: 200px;" type="primary" @click="selectFile_cengci2_ar">AR矩阵存储文件配置</el-button>
-          <br>
-          <br>
-          <input type="file" id="fileInput6" style="display: none;" @change="handleFile_cengci2_land">
-          <el-button style="width: 200px;" type="primary" @click="selectFile_cengci2_land">着舰矩阵存储文件配置</el-button>
-          <br>
-          <br>
-          <input type="file" id="fileInput7" style="display: none;" @change="handleFile_traindata">
-          <el-button style="width: 200px;" type="primary" @click="selectFile_traindata">训练集存储文件配置</el-button>
-
-        </div>
-      </el-card>
-
-      <el-dialog width="50%" title="处理中请勿关闭窗口！处理完毕会自动关闭" :visible.sync="innerVisible" :before-close="handleClose"
-        append-to-body>
-      </el-dialog>
-    </el-dialog>
-
-    <el-dialog :visible.sync="dialogVisible_teamsRT" title="TeamsRT结果" center>
-      <div>
-
-        <h2>故障部件</h2>
-        <el-tag type="danger" size="mini" v-for="item in teamsRTdiagResult.b" :key="item.ID" class="tag-with-margin">{{
-          item.Name }}</el-tag>
-
-        <h2>怀疑部件</h2>
-        <el-tag type="warning" size="mini" v-for="item in teamsRTdiagResult.s" :key="item.ID" class="tag-with-margin">{{
-          item.Name }}</el-tag>
-
-        <h2>无故障部件</h2>
-        <el-tag type="success" size="mini" v-for="item in teamsRTdiagResult.g" :key="item.ID" class="tag-with-margin">{{
-          item.Name }}</el-tag>
-
-        <h2>未知部件</h2>
-        <el-tag type="info" size="mini" v-for="item in teamsRTdiagResult.u" :key="item.ID" dclass="tag-with-margin">{{
-          item.Name }}</el-tag>
-      </div>
-    </el-dialog>
- -->
-
-
-
 
 
   </div>
@@ -260,16 +115,6 @@ currentImage() {
       mounted() {
 
 
-        // this.handleChange(1)
-        ////////////// 具体故障类型故障概率显示 start/////////////////////
-        // this.options_fault_style.forEach(element => {
-        //   this.fault_probabilitys.data.push({
-        //     name: element.label,
-        //     value: 0
-        //   })
-        // });
-
-        ///////////// 具体故障类型故障概率显示 end/////////////////////
       },
       methods: { 
         openFile() {
@@ -277,6 +122,9 @@ currentImage() {
         },
         next() {
         if (this.active++ > 3) this.active = 0;
+      },
+      forward() {
+        if (this.active-- < 0) this.active = 4;
       }
         }
 
@@ -288,141 +136,11 @@ currentImage() {
   </script>
 
   <style>
-    .el-table .warning-row {
-      background: oldlace;
-    }
-
-    .el-table .success-row {
-      background: #f0f9eb;
-    }
-
-
-
-
-
-    .my-component {
-      display: flex;
-    }
-
-    .my-component-left,
-    .my-component-right {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-    }
-
-    .my-component-left-top {
-
-      height: 30vh;
-    }
-
-    .my-component-left-middle {
-      height: 10vh;
-    }
-
-    .my-component-left-bottom {
-      height: 60vh;
-    }
-
-    .my-component-right-top {
-      height: 30vh;
-    }
-
-    .my-component-right-middle {
-      height: 10vh;
-    }
-
-    .my-component-right-bottom {
-      height: 60vh;
-    }
-  </style>
-
-
-
-
-  <style>
-    .bottom-table {
-      width: calc(100% - 10px);
-      height: 100%;
-      margin: 0 -5px;
-
-      .border-box-content {
-        padding: 20px;
-        box-sizing: border-box;
-      }
-
-      .table-name {
-        height: 45px;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        margin-bottom: 15px;
-
-        img {
-          width: 40px;
-          height: 40px;
-          margin-right: 5px;
-        }
-      }
-
-      .dv-scroll-board {
-        height: calc(100% - 60px);
-      }
-    }
-  </style>
-
-  <style>
-    .mc-left {
-      display: flex;
-      /* justify-content: center; */
-      align-items: center;
-      flex-direction: column;
-
-      .mc-left-top-container {
-        height: 50%;
-      }
-
-      .mc-left-bottom-container {
-        height: 50%;
-      }
-
-    }
-  </style>
-
-  <style>
-    .tag-with-margin {
-      margin-right: 10px;
-      /* 添加适当的右边距，根据你想要的间距大小进行调整 */
-    }
-
-    .mc-middle {
-      position: relative;
-      padding: 0 50px;
-      box-sizing: border-box;
-
-    }
-
-    .mc-right {
-      display: flex;
-      /* justify-content: center; */
-      align-items: center;
-      flex-direction: column;
-
-      .mc-right-top-container {
-        height: 50%;
-      }
-
-      .mc-right-bottom-container {
-        height: 50%;
-      }
-
-    }
-  </style>
-
-  <!-- 模型设置对话窗 -->
-  <style>
 
   </style>
+
+
+
 </body>
 
 </html>
