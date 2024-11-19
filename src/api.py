@@ -20,9 +20,6 @@ DIR_PATH = os.path.dirname(os.path.abspath(__file__))
 app = Flask(__name__, static_folder=os.path.join(DIR_PATH,'frontEnd'), static_url_path='/')
 
 
-
-
-
 @app.route('/')
 def index_dataV():
     return app.send_static_file('index_DataV.html')
